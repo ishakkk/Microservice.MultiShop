@@ -15,47 +15,48 @@ namespace MultiShop.Order.WebApi.Controllers
         private readonly CreateAddressCommandHandler _createAddressCommandHandler;
         private readonly UpdateAddressCommandHandler _updateAddressCommandHandler;
         private readonly RemoveAddressCommandHandler _removeAddressCommandHandler;
-        public AddressesController(GetAddressByIdQueryHandler getAddressByIdQueryHandler, CreateAddressCommandHandler createAddressCommandHandler, UpdateAddressCommandHandler updateAddressCommandHandler, RemoveAddressCommandHandler removeAddressCommandHandler)
+        public AddressesController(GetAddressQueryHandler getAddressQueryHandler, GetAddressByIdQueryHandler getAddressByIdQueryHandler, CreateAddressCommandHandler createAddressCommandHandler, UpdateAddressCommandHandler updateAddressCommandHandler, RemoveAddressCommandHandler removeAddressCommandHandler)
         {
+            _getAddressQueryHandler = getAddressQueryHandler;
             _getAddressByIdQueryHandler = getAddressByIdQueryHandler;
             _createAddressCommandHandler = createAddressCommandHandler;
             _updateAddressCommandHandler = updateAddressCommandHandler;
             _removeAddressCommandHandler = removeAddressCommandHandler;
         }
 
-        public AddressesController(GetAddressQueryHandler getAddressQueryHandler)
-        {
-            _getAddressQueryHandler = getAddressQueryHandler;
-        }
         [HttpGet]
         public async Task<IActionResult> AddressList()
         {
             var values = await _getAddressQueryHandler.Handle();
             return Ok(values);
         }
+
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAddressListById(int id)
+        public async Task<IActionResult> GetAddressById(int id)
         {
-            var values =  _getAddressByIdQueryHandler.Handle(new GetAddressByIdQuery(id));
+            var values = await _getAddressByIdQueryHandler.Handle(new GetAddressByIdQuery(id));
             return Ok(values);
         }
+
         [HttpPost]
         public async Task<IActionResult> CreateAddress(CreateAddressCommand command)
         {
             await _createAddressCommandHandler.Handle(command);
-            return Ok("Adres Bilgisi Başarıyla Eklendi");
+            return Ok("Adres bilgisi başarıyla eklendi");
         }
+
         [HttpPut]
         public async Task<IActionResult> UpdateAddress(UpdateAddressCommand command)
         {
             await _updateAddressCommandHandler.Handle(command);
-            return Ok("Adres Bilgisi Başarıyla Güncellendi");
+            return Ok("Adres bilgisi başarıyla güncellendi");
         }
+
         [HttpDelete]
-        public async Task<IActionResult> RomevoAddress(RemoveAddressCommand command)
+        public async Task<IActionResult> RemoveAddress(int id)
         {
-            await _removeAddressCommandHandler.Handle(command);
-            return Ok("Adres Bilgisi Başarıyla Silinldi");
+            await _removeAddressCommandHandler.Handle(new RemoveAddressCommand(id));
+            return Ok("Adres başarıyla silindi");
         }
     }
 }
